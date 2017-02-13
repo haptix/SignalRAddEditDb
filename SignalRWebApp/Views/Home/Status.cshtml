@@ -1,0 +1,60 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Status</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="~/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            // Proxy created on the fly
+            var devTest = $.connection.devTestHub;
+
+            // Declare a function on the job hub so the server can invoke it
+            devTest.client.displayStatus = function () {
+                getData();
+            };
+
+            // Start the connection
+            $.connection.hub.start();
+            getData();
+        });
+
+        function getData() {
+            var $tbl = $('#tblDevTestInfo');
+            $.ajax({
+                url: '/api/DevTestValues',
+                type: 'GET',
+                datatype: 'json',
+                success: function (data) {
+                    if (data.length > 0) {
+                        $tbl.empty();
+                        $tbl.append(' <tr><th>ID</th><th>CampaignName</th><th>Date</th><th>Clicks</th><th>Impressions</th><th>AffiliateName</th></tr>');
+                        var rows = [];
+                        for (var i = 0; i < data.length; i++) {
+                            rows.push(' <tr><td>' + data[i].ID + '</td><td>' + data[i].CampaignName + '</td><td>' + data[i].Date.toString().substr(0, 10) + '</td><td>' + data[i].Clicks + '</td><td>' + data[i].Impressions + '</td><td>' + data[i].AffiliateName + '</td></tr>');
+                        }
+                        $tbl.append(rows.join(''));
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <table id="tblDevTestInfo" style="text-align:center;margin-left:10px"></table>
+    </div>
+</body>
+</html>
